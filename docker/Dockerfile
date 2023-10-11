@@ -28,5 +28,8 @@ RUN	wget -q -O cmake-linux.sh https://github.com/Kitware/CMake/releases/download
 	sh cmake-linux.sh --skip-license --prefix=$CMAKE_INSTALL_DIR && \
 	rm cmake-linux.sh
 ENV PATH ${PATH}:${CMAKE_INSTALL_DIR}/bin
+RUN apt-get update
+RUN apt-get install -y python3-pip python3-setuptools python3-wheel ninja-build
+RUN pip3 install --upgrade numpy empy toml
 
 WORKDIR /root/workspace
