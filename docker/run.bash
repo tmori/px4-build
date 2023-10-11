@@ -16,12 +16,12 @@ then
 		--platform linux/arm64 \
         -v ${HOST_WORKDIR}:${DOCKER_DIR} \
         -it --rm \
-        --net host \
+        -p 14560:14560/udp \
         --name ${IMAGE_NAME} ${DOCKER_IMAGE} 
 else
     docker run \
         -v ${HOST_WORKDIR}:${DOCKER_DIR} \
         -it --rm \
-        --net host \
+        -p 14560:14560/udp \
         --name ${IMAGE_NAME} ${DOCKER_IMAGE} 
 fi

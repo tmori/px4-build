@@ -31,5 +31,6 @@ ENV PATH ${PATH}:${CMAKE_INSTALL_DIR}/bin
 RUN apt-get update
 RUN apt-get install -y python3-pip python3-setuptools python3-wheel ninja-build
 RUN pip3 install --upgrade numpy empy toml
+RUN apt-get install lsof -y
 
 WORKDIR /root/workspace
