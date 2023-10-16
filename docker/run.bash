@@ -14,8 +14,11 @@ if [ $OS_TYPE = "Darwin" ]
 then
     docker run \
 		--platform linux/arm64 \
-        -v ${HOST_WORKDIR}:${DOCKER_DIR} \
         -it --rm \
+        -p 14445:18570/udp \
+        -p 14580:14580/udp \
+        -p 14280:14280/udp \
+        -p 13030:13030/udp \
         -p 14560:14560/udp \
         --name ${IMAGE_NAME} ${DOCKER_IMAGE} 
 else
