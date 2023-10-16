@@ -15,6 +15,8 @@ then
     docker run \
 		--platform linux/arm64 \
         -it --rm \
+        --add-host=host.docker.internal:host-gateway \
+        -v `pwd`/sim:${DOCKER_DIR}/sim \
         -p 14445:18570/udp \
         -p 14580:14580/udp \
         -p 14280:14280/udp \

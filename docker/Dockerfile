@@ -36,6 +36,9 @@ WORKDIR /root/workspace/px4/PX4-Autopilot
 RUN apt-get update -y
 RUN apt-get install -y lsb-release
 RUN apt-get install -y sudo
+ENV DOCKER_LOCAL_HOST_ADDR "host.docker.internal"
 RUN ./Tools/setup/ubuntu.sh --no-nuttx --no-sim-tools
 RUN make px4_sitl_default
 
+
+ENTRYPOINT [ "/bin/bash", "/root/workspace/sim/simstart.bash" ]
