@@ -2,13 +2,25 @@
 
 PX4のシミュレータを単独で起動できる環境を docker でまとめています。
 
-## 事前準備
+## 前提とする環境
+
+* M1/M2 Mac & Docker Desktop
+  * Macの場合は、dockerをRosettaで実行します
+* Windows 10/11 WSL2
+  * Windowsの場合は、WSL2上で実行します
+
+## リポジトリをクローン
 
 本リポジトリーをクローンします。
 
 ```
  git clone --recursive git@github.com:tmori/px4-build.git
 ```
+
+## Mac版
+
+### docker コンテナ起動方法
+
 
 docker イメージを作成します。
 
@@ -24,7 +36,11 @@ REPOSITORY                            TAG       IMAGE ID       CREATED          
 px4-build                             v1.0.0    65d500b2847b   51 minutes ago   1.11GB
 ```
 
-## docker コンテナ起動方法
+イメージ作成時に、PX4のビルドは終わっています。
+
+### docker コンテナ起動方法
+
+docker コンテナを起動すると、ホストPCの 4560 ポートにTCP接続します。
 
 ```
 bash docker/run.bash
@@ -33,61 +49,9 @@ bash docker/run.bash
 成功すると、こうなります。
 
 ```
-% bash docker/run.bash 
 arm64
 Darwin
-root@docker-desktop:~/workspace#
-
-root@docker-desktop:~/workspace# ls
-LICENSE  PX4-Autopilot  README.md  docker
-```
-
-## ビルド方法
-
-```
-cd PX4-Autopilot
-```
-
-ubuntu向けのセットアップをします。
-
-```
-./Tools/setup/ubuntu.sh 
-```
-
-なぜか、以下のエラーログが出てきますが、シミュレータ向けなので、多分影響ないと思われます。。
-
-```
-Installing NuttX dependencies
-Reading package lists...
-Building dependency tree...
-Reading state information...
-Package gcc-multilib is not available, but is referred to by another package.
-This may mean that the package is missing, has been obsoleted, or
-is only available from another source
-
-E: Unable to locate package g++-multilib
-E: Couldn't find any package by regex 'g++-multilib'
-E: Package 'gcc-multilib' has no installation candidate
-```
-
-ビルドします。
-
-```
-make px4_sitl_default
-```
-
-## px4 起動方法
-
-docker コンテナを起動し、PX4-Autopilot　に移動し、以下のコマンドを実行します。
-
-```
-./build/px4_sitl_default/bin/px4
-```
-
-成功すると、以下のログが出力されます。
-
-```
-root@docker-desktop:~/workspace/PX4-Autopilot# ./build/px4_sitl_default/bin/px4
+[0/1] launching px4 none_iris (SYS_AUTOSTART=10016)
 
 ______  __   __    ___ 
 | ___ \ \ \ / /   /   |
@@ -99,37 +63,52 @@ ______  __   __    ___
 px4 starting.
 
 INFO  [px4] startup script: /bin/sh etc/init.d-posix/rcS 0
+env SYS_AUTOSTART: 10016
 INFO  [param] selected parameter default file parameters.bson
 INFO  [param] selected parameter backup file parameters_backup.bson
+  SYS_AUTOCONFIG: curr: 0 -> new: 1
+  SYS_AUTOSTART: curr: 0 -> new: 10016
+  CAL_ACC0_ID: curr: 0 -> new: 1310988
+  CAL_GYRO0_ID: curr: 0 -> new: 1310988
+  CAL_ACC1_ID: curr: 0 -> new: 1310996
+  CAL_GYRO1_ID: curr: 0 -> new: 1310996
+  CAL_ACC2_ID: curr: 0 -> new: 1311004
+  CAL_GYRO2_ID: curr: 0 -> new: 1311004
+  CAL_MAG0_ID: curr: 0 -> new: 197388
+  CAL_MAG0_PRIO: curr: -1 -> new: 50
+  CAL_MAG1_ID: curr: 0 -> new: 197644
+  CAL_MAG1_PRIO: curr: -1 -> new: 50
+* SENS_BOARD_X_OFF: curr: 0.0000 -> new: 0.0000
+* SENS_DPRES_OFF: curr: 0.0000 -> new: 0.0010
 INFO  [dataman] data manager file './dataman' size is 7866640 bytes
-INFO  [init] SIH simulator
-INFO  [simulator_sih] Simulation loop with 250 Hz (4000 us sim time interval)
-INFO  [simulator_sih] Simulation with 1.0x speedup. Loop with (4000 us wall time interval)
-INFO  [lockstep_scheduler] setting initial absolute time to 4000 us
-INFO  [commander] LED: open /dev/led0 failed (22)
-No autostart ID found
-INFO  [mavlink] mode: Normal, data rate: 4000000 B/s on udp port 18570 remote port 14550
-INFO  [mavlink] mode: Onboard, data rate: 4000000 B/s on udp port 14580 remote port 14540
-INFO  [mavlink] mode: Onboard, data rate: 4000 B/s on udp port 14280 remote port 14030
-INFO  [mavlink] mode: Gimbal, data rate: 400000 B/s on udp port 13030 remote port 13280
-INFO  [logger] logger started (mode=all)
-INFO  [logger] Start file log (type: full)
-INFO  [logger] [logger] ./log/2023-10-11/04_09_27.ulg
-INFO  [logger] Opened full log file: ./log/2023-10-11/04_09_27.ulg
-INFO  [mavlink] MAVLink only on localhost (set param MAV_{i}_BROADCAST = 1 to enable network)
-INFO  [mavlink] MAVLink only on localhost (set param MAV_{i}_BROADCAST = 1 to enable network)
-INFO  [px4] Startup script returned successfully
+etc/init.d-posix/rcS: 39: [: Illegal number: 
+INFO  [init] PX4_SIM_HOSTNAME: 192.168.65.254
+INFO  [simulator_mavlink] using TCP on remote host 192.168.65.254 port 4560
 ```
 
-このあと、以下の警告メッセージが出てきますが、シミュレータ単独で起動しているためと思われます（調査中）
+この状態で、シミュレータを立ち上げれば動き始めます。
+
+## Windows版
+
+### PX4のビルド方法
 
 ```
-ARN  [health_and_arming_checks] Preflight Fail: Accel 0 uncalibrated
-WARN  [health_and_arming_checks] Preflight Fail: barometer 0 missing
-WARN  [health_and_arming_checks] Preflight Fail: Gyro 0 uncalibrated
-WARN  [health_and_arming_checks] Preflight Fail: Compass Sensor 0 missing
-WARN  [health_and_arming_checks] Preflight Fail: Accel 0 uncalibrated
-WARN  [health_and_arming_checks] Preflight Fail: barometer 0 missing
-WARN  [health_and_arming_checks] Preflight Fail: Gyro 0 uncalibrated
-WARN  [health_and_arming_checks] Preflight Fail: Compass Sensor 0 missing
+cd PX4-Autopilot
 ```
+
+ubuntu向けのセットアップをします。
+
+```
+./Tools/setup/ubuntu.sh --no-nuttx --no-sim-tools
+```
+
+エラー等が出ていなければ成功です。
+
+### px4 起動方法
+
+PX4-Autopilot　に移動し、以下のコマンドを実行します。
+
+```
+make px4_sitl none_iris
+```
+
