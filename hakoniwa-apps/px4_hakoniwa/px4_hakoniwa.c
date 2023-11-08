@@ -51,12 +51,21 @@
 #include <uORB/uORB.h>
 #include <uORB/topics/vehicle_acceleration.h>
 #include <uORB/topics/vehicle_attitude.h>
+#include <uORB/topics/actuator_outputs.h>
 
 __EXPORT int px4_hakoniwa_main(int argc, char *argv[]);
 
 int px4_hakoniwa_main(int argc, char *argv[])
 {
 	PX4_INFO("HAKONIWA START");
+	struct actuator_outputs_s act_outs;
+	memset(&act_outs, 0, sizeof(act_outs));
+	orb_advert_t act_pub = orb_advertise(ORB_ID(actuator_outputs_sim), &act_outs);
+	act_outs.timestamp = 1024;
+	act_outs.output[0] = 1;
+	act_outs.output[1] = 1;
+	act_outs.output[2] = 1;
+	act_outs.output[3] = 1;
 
 	/* subscribe to vehicle_acceleration topic */
 	int sensor_sub_fd = orb_subscribe(ORB_ID(vehicle_acceleration));
@@ -116,6 +125,8 @@ int px4_hakoniwa_main(int argc, char *argv[])
 				att.q[2] = accel.xyz[2];
 
 				orb_publish(ORB_ID(vehicle_attitude), att_pub, &att);
+
+				orb_publish(ORB_ID(actuator_outputs_sim), act_pub, &act_outs);
 			}
 
 			/* there could be more file descriptors here, in the form like:
