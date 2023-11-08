@@ -41,4 +41,4 @@ RUN ./Tools/setup/ubuntu.sh --no-nuttx --no-sim-tools
 RUN make px4_sitl_default
 
 
-ENTRYPOINT [ "/bin/bash", "/root/workspace/sim/simstart.bash" ]
+#ENTRYPOINT [ "/bin/bash", "/root/workspace/sim/simstart.bash" ]
