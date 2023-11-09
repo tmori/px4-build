@@ -59,17 +59,29 @@ extern "C" __EXPORT int px4_hakoniwa_main(int argc, char *argv[])
 {
 	return Px4Hakoniwa::main(argc, argv);
 }
-
+#define DRONE_PHYS_DELTA_TIME	0.001 /* 4msec */
+#define DRONE_PHYS_DELTA_TIME_USC	1000
 
 Px4Hakoniwa::Px4Hakoniwa() :
 	ScheduledWorkItem(MODULE_NAME, px4::wq_configurations::hp_default)
 {
-	PX4_INFO("Hakoniwa created");
+	_param.m = DRONE_PARAM_M;
+    _param.l = DRONE_PARAM_L;
+    _param.gravity = DRONE_PARAM_GRAVITY;
+    _param.k = DRONE_PARAM_K;
+    _param.p = DRONE_PARAM_P;
+	
+	memset(&_drone_propeller, 0, sizeof(_drone_propeller));
+    drone_control_init(_drone_ctrl, DRONE_PHYS_DELTA_TIME);
+
+	memset(&act_outs, 0, sizeof(act_outs));
+	act_pub = orb_advertise(ORB_ID(actuator_outputs_sim), &act_outs);
+
 }
 
 bool Px4Hakoniwa::init()
 {
-	ScheduleOnInterval(1000 * 1000); /* 1sec */
+	ScheduleOnInterval(DRONE_PHYS_DELTA_TIME_USC); 
 	return true;
 }
 
@@ -80,7 +92,33 @@ void Px4Hakoniwa::Run()
 		exit_and_cleanup();
 		return;
 	}
-	PX4_INFO("HELLO");
+	if (_vehicle_global_position_sub.updated()) {
+		_vehicle_global_position_sub.copy(&vehicle_global_position);
+		//hrt_abstime h = hrt_absolute_time();
+		//PX4_INFO("time: %ld alt: %f", h, (double)vehicle_global_position.alt);
+		Vector3Type current_pos;
+		current_pos.x = 0;
+		current_pos.y = 0;
+		current_pos.z = vehicle_global_position.alt;
+		drone_control_run(_drone_ctrl, current_pos);
+		convert2RotationRate(_drone_ctrl.signal, _param, _drone_propeller);
+	#if 1
+		//PX4_INFO("w[0]: %f", (double)_drone_propeller.w[0]);
+		//PX4_INFO("w[1]: %f", (double)_drone_propeller.w[1]);
+		//PX4_INFO("w[2]: %f", (double)_drone_propeller.w[2]);
+		//PX4_INFO("w[3]: %f", (double)_drone_propeller.w[3]);
+	#endif
+		act_outs.timestamp = 1024;
+	#if 1
+	#define MY_CONST 15.0
+		act_outs.output[0] = (double)_drone_propeller.w[0] * MY_CONST;
+		act_outs.output[1] = (double)_drone_propeller.w[1] * MY_CONST;
+		act_outs.output[2] = (double)_drone_propeller.w[2] * MY_CONST;
+		act_outs.output[3] = (double)_drone_propeller.w[3] * MY_CONST;
+	#endif
+		orb_publish(ORB_ID(actuator_outputs_sim), act_pub, &act_outs);
+	}
+
 }
 
 int Px4Hakoniwa::task_spawn(int argc, char *argv[])

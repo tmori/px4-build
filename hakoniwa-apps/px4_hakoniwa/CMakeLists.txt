@@ -35,6 +35,7 @@ px4_add_module(
 	MAIN px4_hakoniwa
 	SRCS
 		px4_hakoniwa.cpp
+		control/drone_control.cpp
 	DEPENDS
 		px4_work_queue
 	)
