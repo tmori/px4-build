@@ -34,6 +34,7 @@ px4_add_module(
 	MODULE examples__px4_hakoniwa
 	MAIN px4_hakoniwa
 	SRCS
-		px4_hakoniwa.c
+		px4_hakoniwa.cpp
 	DEPENDS
+		px4_work_queue
 	)
