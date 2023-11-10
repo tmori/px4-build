@@ -2,9 +2,9 @@
 #include <cstring>
 
 // PIDゲインの定数を定義
-constexpr float DRONE_CONTROL_PID_POS_Z_KP = 5.0f;  // 比例ゲイン
-constexpr float DRONE_CONTROL_PID_POS_Z_KI = 5.0f;  // 積分ゲイン
-constexpr float DRONE_CONTROL_PID_POS_Z_KD = 0.5f;  // 微分ゲイン
+constexpr float DRONE_CONTROL_PID_POS_Z_KP = 2.0f;  // 比例ゲイン
+constexpr float DRONE_CONTROL_PID_POS_Z_KI = 1.0f;  // 積分ゲイン
+constexpr float DRONE_CONTROL_PID_POS_Z_KD = 0.50f;  // 微分ゲイン
 
 constexpr float DRONE_CONTROL_PID_ROT_X_KP = 20.0f;  // 比例ゲイン
 constexpr float DRONE_CONTROL_PID_ROT_X_KI = 1.0f;  // 積分ゲイン
@@ -56,9 +56,9 @@ void drone_control_init(DroneControlType& ctrl, double delta_t)
 
 }
 
-void drone_control_run(DroneControlType& ctrl, Vector3Type& current_pos)
+void drone_control_run(DroneControlType& ctrl, Vector3Type& current_pos, double delta_t)
 {
-    ctrl.signal.thrust = updatePID(ctrl.target_pos.pid_z, current_pos.z, ctrl.delta_t) / (double)1000.0f;
+    ctrl.signal.thrust = updatePID(ctrl.target_pos.pid_z, current_pos.z, delta_t);
     //PX4_INFO("thrust: %f", ctrl.signal.thrust);
     ctrl.signal.thrust = get_value_with_limit(ctrl.signal.thrust, DRONE_THRUST_MAX, DRONE_THRUST_MIN);
 }

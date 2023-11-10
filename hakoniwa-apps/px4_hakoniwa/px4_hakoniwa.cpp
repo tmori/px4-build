@@ -94,13 +94,20 @@ void Px4Hakoniwa::Run()
 	}
 	if (_vehicle_global_position_sub.updated()) {
 		_vehicle_global_position_sub.copy(&vehicle_global_position);
-		//hrt_abstime h = hrt_absolute_time();
+		hrt_abstime curr = hrt_absolute_time();
+		hrt_abstime prev = 0;
+		double delta = _drone_ctrl.delta_t;
+		if (prev != 0) {
+			hrt_abstime diff = curr - prev; /* usec */
+			delta = ((double)diff) / 1000000.0; /* sec */
+		}
+		prev = curr;
 		//PX4_INFO("time: %ld alt: %f", h, (double)vehicle_global_position.alt);
 		Vector3Type current_pos;
 		current_pos.x = 0;
 		current_pos.y = 0;
 		current_pos.z = vehicle_global_position.alt;
-		drone_control_run(_drone_ctrl, current_pos);
+		drone_control_run(_drone_ctrl, current_pos, delta);
 		convert2RotationRate(_drone_ctrl.signal, _param, _drone_propeller);
 	#if 1
 		//PX4_INFO("w[0]: %f", (double)_drone_propeller.w[0]);
@@ -110,7 +117,7 @@ void Px4Hakoniwa::Run()
 	#endif
 		act_outs.timestamp = 1024;
 	#if 1
-	#define MY_CONST 15.0
+	#define MY_CONST 1.0
 		act_outs.output[0] = (double)_drone_propeller.w[0] * MY_CONST;
 		act_outs.output[1] = (double)_drone_propeller.w[1] * MY_CONST;
 		act_outs.output[2] = (double)_drone_propeller.w[2] * MY_CONST;
